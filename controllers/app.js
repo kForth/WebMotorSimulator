@@ -934,7 +934,7 @@ app.controller('ApplicationController', function ($scope, $localStorage, $sessio
         simulator_data = {};
         simulators = {};
         $scope.element_titles = {};
-        $scope.elements_can_plot = undefined;
+        $scope.elements_can_plot = [];
         $scope.series = [];
         $scope.data = [];
         $scope.models.forEach(function(model){
@@ -958,7 +958,7 @@ app.controller('ApplicationController', function ($scope, $localStorage, $sessio
                 model.simulation_time,
                 model.max_dist);
             simulators[model.id] = sim;
-            if ($scope.elements_can_plot === undefined) {
+            if ($scope.elements_can_plot === []) {
                 var pnt = sim.getFinalPoint();
                 $scope.elements_can_plot = Object.keys(pnt);
             }
