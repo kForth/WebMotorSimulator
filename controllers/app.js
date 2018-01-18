@@ -1046,6 +1046,7 @@ app.controller('ApplicationController', function ($scope, $localStorage, $sessio
 
     var simulators = {};
     var simulator_data = {};
+    $scope.elements_can_plot = [];
     $scope.element_titles = {};
     $scope.series = [];
     $scope.data = [];
