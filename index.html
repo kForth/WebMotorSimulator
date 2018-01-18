@@ -23,9 +23,9 @@
                 <h3 class="model-section-header">
                     {{ model.name }} <small>{{ model.model_type.name }}</small>
                     <ul class="model-section-header-icons list-inline">
-                        <li><span class="glyphicon glyphicon-plus-sign" ng-click="duplicateModel(model)"></span></li>
-                        <li><span class="glyphicon glyphicon-edit" ng-click="editModel(model)"></span></li>
-                        <li><span class="glyphicon glyphicon-trash" ng-click="deleteModel(model)"></span></li>
+                        <li><span class="glyphicon glyphicon-plus-sign" ng-click="duplicateModel(model)" uib-tooltip="Duplicate"></span></li>
+                        <li><span class="glyphicon glyphicon-edit" ng-click="editModel(model)" uib-tooltip="Edit"></span></li>
+                        <li><span class="glyphicon glyphicon-trash" ng-click="deleteModel(model)" uib-tooltip="Delete"></span></li>
                         <li ng-click="models_collapsed[model.id] = !models_collapsed[model.id]">
                             <span class="glyphicon glyphicon-triangle-bottom model-section-caret" ng-if="models_collapsed[model.id]"></span>
                             <span class="glyphicon glyphicon-triangle-top model-section-caret" ng-if="!models_collapsed[model.id]"></span>
@@ -33,13 +33,14 @@
                     </ul>
                 </h3>
 
-                <div class="row">
-                    <ul class="list-unstyled col-xs-6" uib-collapse="models_collapsed[model.id]"
-                        ng-repeat="set_cat in ['basic', 'power']">
-                        <li ng-repeat="input in model.inputs[set_cat]">
-                            <b>{{ input.label }}:</b> {{ model[input.key] }}
-                        </li>
-                    </ul>
+                <div uib-collapse="models_collapsed[model.id]" >
+                    <div class="row">
+                        <ul class="list-unstyled col-xs-6" ng-repeat="set_cat in ['basic', 'power']">
+                            <li ng-repeat="input in model.inputs[set_cat]">
+                                <b>{{ input.label }}:</b> {{ model[input.key] }}
+                            </li>
+                        </ul>
+                    </div>
                 </div>
         </div>
         </div>
