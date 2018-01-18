@@ -10,6 +10,32 @@ String.prototype.replaceAll = function (str1, str2, ignore) {
     return this.replace(new RegExp(str1.replace(/([\/\,\!\\\^\$\{\}\[\]\(\)\.\*\+\?\|\<\>\-\&])/g, "\\$&"), (ignore ? "gi" : "g")), (typeof(str2) == "string") ? str2.replace(/\$/g, "$$$$") : str2);
 };
 
+function hslToRgb(h, s, l){
+    var r, g, b;
+
+    if(s === 0){
+        r = g = b = l; // achromatic
+    }
+    else{
+        var hue2rgb = function hue2rgb(p, q, t){
+            if(t < 0) t += 1;
+            if(t > 1) t -= 1;
+            if(t < 1/6) return p + (q - p) * 6 * t;
+            if(t < 1/2) return q;
+            if(t < 2/3) return p + (q - p) * (2/3 - t) * 6;
+            return p;
+        };
+
+        var q = l < 0.5 ? l * (1 + s) : l + s - l * s;
+        var p = 2 * l - q;
+        r = hue2rgb(p, q, h + 1/3);
+        g = hue2rgb(p, q, h);
+        b = hue2rgb(p, q, h - 1/3);
+    }
+
+    return [Math.round(r * 255), Math.round(g * 255), Math.round(b * 255)];
+}
+
 function Simulator(motors,  // Motor object
                    gear_ratio,  // Gear ratio, driven/driving
                    motor_current_limit,  // Current limit per motor, A
@@ -976,6 +1002,21 @@ app.controller('ApplicationController', function ($scope, $localStorage, $sessio
 
     $scope.loadLines = function () {
         $scope.data = [];
+        $scope.datasetOverride = [];
+
+        var line_colours = [];
+        for(var i=0; i < $scope.models.length; i++) {
+            var hue = (i / $scope.models.length);
+            var saturation = 0.5;
+            var luminance = 0.5;
+            line_colours.push(hslToRgb(hue, saturation, luminance));
+        }
+
+        var line_types = [[100000, 1], [6, 2]];
+        for(var i=2; i < $scope.elements_can_plot.length; i++) {
+            line_types.push(line_types[line_types.length-1].concat([2, 2]));
+        }
+
         $scope.models.forEach(function(model){
             if($scope.visible_models[model.id]) {
                 $scope.elements_can_plot.forEach(function (key) {
@@ -987,6 +1028,12 @@ app.controller('ApplicationController', function ($scope, $localStorage, $sessio
                             data.push(pnt);
                         });
                         $scope.data.push(data);
+                        $scope.datasetOverride.push({
+                            pointRadius: 0,
+                            fill: false,
+                            borderColor: "rgb(" + line_colours[$scope.models.indexOf(model)].join(', ') + ")",
+                            borderDash: line_types[$scope.elements_can_plot.indexOf(key)]
+                        });
                     }
                 });
             }
