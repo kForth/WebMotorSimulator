@@ -1,0 +1,140 @@
+<html lang="en" ng-app="app">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width" />
+    <title>Acceleration Simulator</title>
+    <link rel="stylesheet" type="text/css" href="node_modules/bootstrap/dist/css/bootstrap.css">
+    <link rel="stylesheet" type="text/css" href="css/main.css">
+    <link rel="stylesheet" type="text/css" href="css/add_model.css">
+    <link rel="stylesheet" type="text/css" href="css/loading.css">
+
+</head>
+<body ng-controller="ApplicationController">
+
+<div class="content" ng-cloak>
+    <div class="col-xs-* col-sm-4 col-sm-push-8 data-section">
+        <ul class="list-inline header-row">
+            <li ng-repeat="model_type in model_types">
+                <button class="btn btn-default" ng-click="addModel(model_type)">Add {{ model_type.name }}</button>
+            </li>
+        </ul>
+        <div class="model-section-holder" ui-sortable ng-model="models">
+            <div class="model-section" ng-repeat="model in models">
+                <h3 class="model-section-header">
+                    {{ model.name }} <small>{{ model.model_type.name }}</small>
+                    <ul class="model-section-header-icons list-inline">
+                        <li><span class="glyphicon glyphicon-plus-sign" ng-click="duplicateModel(model)"></span></li>
+                        <li><span class="glyphicon glyphicon-edit" ng-click="editModel(model)"></span></li>
+                        <li><span class="glyphicon glyphicon-trash" ng-click="deleteModel(model)"></span></li>
+                        <li ng-click="models_collapsed[model.id] = !models_collapsed[model.id]">
+                            <span class="glyphicon glyphicon-triangle-bottom model-section-caret" ng-if="models_collapsed[model.id]"></span>
+                            <span class="glyphicon glyphicon-triangle-top model-section-caret" ng-if="!models_collapsed[model.id]"></span>
+                        </li>
+                    </ul>
+                </h3>
+
+                <div class="row">
+                    <ul class="list-unstyled col-xs-6" uib-collapse="models_collapsed[model.id]"
+                        ng-repeat="set_cat in ['basic', 'power']">
+                        <li ng-repeat="input in model.inputs[set_cat]">
+                            <b>{{ input.label }}:</b> {{ model[input.key] }}
+                        </li>
+                    </ul>
+                </div>
+        </div>
+        </div>
+    </div>
+
+    <div class="col-xs-* col-sm-8 col-sm-pull-4 chart-section">
+        <div class="chart-holder">
+            <canvas id="line" class="chart chart-line" chart-data="data"
+                    chart-labels="labels" chart-series="series" chart-options="options"
+                    chart-dataset-override="datasetOverride" chart-click="onClick">
+            </canvas>
+        </div>
+        <div class="legend-holder row">
+            <div class="col-xs-* col-sm-6 legend">
+                <ul class="list-unstyled legend-pane">
+                    <li class="legend-row" ng-repeat="model in models">
+                        <input type="checkbox" ng-model="visible_models[model.id]" id="checkbox_{{ model.id }}" ng-change="loadLines()"/>
+                        <label for="checkbox_{{ model.id }}">{{model.name}}</label>
+                    </li>
+                </ul>
+            </div>
+            <div class="col-xs-* col-sm-6 legend">
+                <ul class="list-unstyled legend-pane">
+                    <li class="legend-row form-inline" ng-repeat="elem in elements_can_plot">
+                        <div class="form-group">
+                            <input type="checkbox" ng-model="visible_elements[elem]" id="checkbox_{{ elem }}" ng-change="loadLines()"/>
+                            <label for="checkbox_{{ elem }}">{{ element_titles[elem] }}</label>
+                        </div>
+                        <div class="form-group">
+                            <label for="input_{{ elem }}"> / </label>
+                            <input class="form-control" style="width: 80px" type="number" id="input_{{ elem }}"
+                                   ng-model="scale_factors[elem]" ng-change="loadLines()" />
+                        </div>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="model-popup-holder" ng-if="temp_model != undefined">
+    <div class="model-popup">
+        <h1 class="model-popup-title" ng-if="temp_model.id === undefined">Create New {{ temp_model_type.name }}</h1>
+        <h1 class="model-popup-title" ng-if="temp_model.id !== undefined">Edit {{ temp_model_type.name }}</h1>
+        <div class="settings-form">
+            <div class='settings-group' ng-repeat="set_cat in settings_categories">
+                <div class="model-popup-adv-toggle" ng-click="settings_collapsed[set_cat.key] = !settings_collapsed[set_cat.key]">
+                    {{ set_cat.text }}
+                    <span class="glyphicon glyphicon-triangle-bottom" ng-show="settings_collapsed[set_cat.key]"></span>
+                    <span class="glyphicon glyphicon-triangle-top" ng-show="!settings_collapsed[set_cat.key]"></span>
+                </div>
+                <div class="model-popup-form row" uib-collapse="settings_collapsed[set_cat.key]">
+                    <div class="col-xs-* col-sm-6 form-group" ng-repeat="model_input in temp_model_inputs[set_cat.key]"
+                         ng-class="{'has-error': model_input_errors.indexOf(model_input.key) > -1}">
+                        <label for="input_{{ model_input.key }}" class="col-xs-6 col-form-label">{{ model_input.label }}:</label>
+                        <div class="col-xs-6 input-group" ng-if="model_input.type != 'motor_type'">
+                            <input class="form-control" placeholder="{{ model_input.label }}"
+                                   type="{{ model_input.type }}" id="input_{{ model_input.key }}"
+                                   ng-model="temp_model[model_input.key]">
+                            <div class="input-group-addon" ng-if="model_input.suffix != undefined">{{ model_input.suffix }}</div>
+                        </div>
+                        <div class="col-xs-6 input-group" ng-if="model_input.type == 'motor_type'">
+                            <select class="form-control" id="input_{{ model_input.key }}" ng-model="temp_model[model_input.key]">
+                                <option ng-repeat="motor in motors" value="{{ motor }}">
+                                    {{ motor.name }}
+                                </option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <ul class="list-inline settings-button-group">
+            <li><button class="btn btn-danger" ng-click="cancelModel()">Cancel</button></li>
+            <li><button class="btn btn-primary" ng-click="submitModel()">Submit</button></li>
+        </ul>
+    </div>
+</div>
+
+<div class="loading-popup" ng-show="data_loading > 0">
+    <h1>Loading...</h1>
+    <img src="img/celtx_717x717.png">
+</div>
+
+<script src="node_modules/moment/moment.js"></script>
+<script src="node_modules/chart.js/dist/Chart.min.js"></script>
+<script src="node_modules/jquery/dist/jquery.min.js"></script>
+<script src="node_modules/jquery-ui-dist/jquery-ui.min.js"></script>
+<script src="node_modules/angular/angular.min.js"></script>
+<script src="node_modules/ngstorage/ngStorage.min.js"></script>
+<script src="node_modules/angular-chart.js/dist/angular-chart.min.js"></script>
+<script src="node_modules/angular-animate/angular-animate.min.js"></script>
+<script src="node_modules/angular-ui-bootstrap/dist/ui-bootstrap-tpls.js"></script>
+<script src="node_modules/angular-ui-sortable/dist/sortable.min.js"></script>
+<script src="controllers/app.js"></script>
+</body>
+</html>
