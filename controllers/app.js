@@ -829,6 +829,8 @@ app.controller('ApplicationController', function ($scope, $localStorage, $sessio
     $scope.deleteModel = function (model) {
         $scope.models.splice($scope.models.indexOf(model), 1);
         delete $scope.models_collapsed[model.id];
+        delete $scope.visible_models[model.id];
+        $scope.loadLines();
     };
 
     $scope.editModel = function (model) {
@@ -852,7 +854,7 @@ app.controller('ApplicationController', function ($scope, $localStorage, $sessio
         var model = angular.copy($scope.temp_model);
         model.model_type = $scope.temp_model_type;
 
-        for (var key in model) {
+        for (var key in model) { //Load default parameters in case the user erased them.
             if (model[key] === undefined || model[key] === "" || model[key] === null) {
                 model[key] = $scope.temp_model_type.model[key];
             }
@@ -874,12 +876,12 @@ app.controller('ApplicationController', function ($scope, $localStorage, $sessio
 
         if ($scope.model_input_errors.length === 0) {
             model.inputs = $scope.getModelInputs(model.model_type);
-            if (model.id === undefined) {
+            if (model.id === undefined || model.id == null) {
                 model.id = next_model_id++;
                 $scope.models_collapsed[model.id] = true;
             }
 
-            if($scope.visible_models[model.id] === undefined) {
+            if($scope.visible_models[model.id] === undefined || $scope.visible_models[model.id] === null) {
                 $scope.visible_models[model.id] = ($scope.models.length < 5);
             }
 
@@ -989,7 +991,6 @@ app.controller('ApplicationController', function ($scope, $localStorage, $sessio
                 });
             }
         });
-        console.log($scope.data);
     };
 
     $scope.onClick = function (points, evt) {
