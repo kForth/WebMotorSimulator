@@ -220,7 +220,9 @@ app.controller('ApplicationController', function ($scope, $localStorage, $sessio
             for (var i in $scope.elements_can_plot) {
                 var elem = $scope.elements_can_plot[i];
                 data[elem] = [];
-                $scope.scale_factors[elem] = 1;
+                if($scope.scale_factors[elem] === undefined) {
+                    $scope.scale_factors[elem] = 1;
+                }
                 $scope.element_titles[elem] = elem.replaceAll('_', ' ').toProperCase();
             }
             sim.getDataPoints().forEach(function (pt) {
@@ -266,9 +268,9 @@ app.controller('ApplicationController', function ($scope, $localStorage, $sessio
             line_colours.push(hslToRgb(hue, saturation, luminance));
         }
 
-        var line_types = [[100000, 1], [6, 2]];
-        for(var i=2; i < $scope.elements_can_plot.length; i++) {
-            line_types.push(line_types[line_types.length-1].concat([2, 2]));
+        var line_types = [[20, 5], [100000, 1], [10, 2]];
+        for(var i=line_types.length; i < $scope.elements_can_plot.length; i++) {
+            line_types.push(line_types[line_types.length-1].concat([2, 3]));
         }
 
         $scope.models.forEach(function(model){
