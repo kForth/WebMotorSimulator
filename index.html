@@ -72,7 +72,7 @@
                         <div class="form-group">
                             <label for="input_{{ elem }}"> / </label>
                             <input class="form-control" style="width: 80px" type="number" id="input_{{ elem }}"
-                                   ng-model="scale_factors[elem]" ng-change="loadLines()" />
+                                   ng-change="loadLines()" ng-model="scale_factors[elem]" />
                         </div>
                     </li>
                 </ul>
@@ -136,6 +136,8 @@
 <script src="node_modules/angular-animate/angular-animate.min.js"></script>
 <script src="node_modules/angular-ui-bootstrap/dist/ui-bootstrap-tpls.js"></script>
 <script src="node_modules/angular-ui-sortable/dist/sortable.min.js"></script>
+<script src="js/model.js"></script>
+<script src="js/simulator.js"></script>
 <script src="controllers/app.js"></script>
 </body>
 </html>
