@@ -52,7 +52,7 @@ app.controller('ApplicationController', function ($scope, $localStorage, $sessio
 
     $scope.models = $sessionStorage.models || [];
     $scope.models_collapsed = $sessionStorage.models_collapsed || {};
-    $scope.scale_factors = $sessionStorage.scale_factors || {};
+    $scope.scale_factors = $sessionStorage.scale_factors || DATA_SCALE_FACTORS;
     $scope.visible_models = $sessionStorage.visible_models || {};
     $scope.visible_elements = $sessionStorage.visible_elements || {};
     $scope.temp_model = undefined;
@@ -187,8 +187,6 @@ app.controller('ApplicationController', function ($scope, $localStorage, $sessio
         var temp_series = [];
         simulator_data = {};
         simulators = {};
-        $scope.element_titles = {};
-        $scope.elements_can_plot = [];
         $scope.series = [];
         $scope.data = [];
         $scope.models.forEach(function(model){
@@ -212,19 +210,10 @@ app.controller('ApplicationController', function ($scope, $localStorage, $sessio
                 model.simulation_time,
                 model.max_dist);
             simulators[model.id] = sim;
-            if ($scope.elements_can_plot  < 1) {
-                var pnt = sim.getFinalPoint();
-                $scope.elements_can_plot = Object.keys(pnt);
-            }
             var data = {};
-            for (var i in $scope.elements_can_plot) {
-                var elem = $scope.elements_can_plot[i];
+            $scope.elements_can_plot.forEach(function(elem){
                 data[elem] = [];
-                if($scope.scale_factors[elem] === undefined) {
-                    $scope.scale_factors[elem] = 1;
-                }
-                $scope.element_titles[elem] = elem.replaceAll('_', ' ').toProperCase();
-            }
+            });
             sim.getDataPoints().forEach(function (pt) {
                 for (var k in data) {
                     data[k].push({
@@ -303,8 +292,8 @@ app.controller('ApplicationController', function ($scope, $localStorage, $sessio
 
     var simulators = {};
     var simulator_data = {};
-    $scope.elements_can_plot = [];
-    $scope.element_titles = {};
+    $scope.elements_can_plot = Object.keys(DATA_HEADERS);
+    $scope.element_titles = DATA_HEADERS;
     $scope.series = [];
     $scope.data = [];
     $scope.datasetOverride = [];

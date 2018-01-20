@@ -212,6 +212,38 @@ function Simulator(motors,  // Motor object
     return this;
 }
 
+var DATA_HEADERS = {
+    'time':          'Time (s)',
+    'pos':           'Position (m)',
+    'vel':           'Velocity (m/s)',
+    'accel':         'Acceleration (m/s/s)',
+    'voltage':       'Voltage (V)',
+    'current':       'Current/10 (A)',
+    'total_current': 'Total Current/100 (A)',
+    'sys_voltage':   'System Voltage (V)',
+    'energy':        'Energy (nAh)',
+    'total_energy':  'Total Energy/10 (mAh)',
+    'slipping':      'Slipping',
+    'brownout':      'Brownout',
+    'gravity':       'Force of Gravity (N)'
+};
+
+var DATA_SCALE_FACTORS = {
+    'time':          1,
+    'pos':           1,
+    'vel':           1,
+    'accel':         1,
+    'voltage':       1,
+    'current':       10,
+    'total_current': 100,
+    'sys_voltage':   1,
+    'energy':        100,
+    'total_energy':  10,
+    'slipping':      1,
+    'brownout':      1,
+    'gravity':       1
+};
+
 var MOTORS = [
     {
         name: "CIM",
