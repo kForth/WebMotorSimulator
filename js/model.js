@@ -424,9 +424,9 @@ function getModelInputs(model_type) {
         ],
         'basic': []
     };
-    inputs.basic = model_inputs[model_type.name];
+    inputs.basic = MODEL_INPUTS[model_type.name];
     return inputs;
-};
+}
 
 var SETTINGS_CATEGORIES = [
     {

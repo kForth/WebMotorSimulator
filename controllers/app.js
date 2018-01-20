@@ -260,17 +260,18 @@ app.controller('ApplicationController', function ($scope, $localStorage, $sessio
         $scope.data = [];
         $scope.datasetOverride = [];
 
-        var line_colours = [];
+        $scope.line_colours = [];
         for(var i=0; i < $scope.models.length; i++) {
             var hue = (i / $scope.models.length);
             var saturation = 0.5;
             var luminance = 0.5;
-            line_colours.push(hslToRgb(hue, saturation, luminance));
+            var rgb = hslToRgb(hue, saturation, luminance);
+            $scope.line_colours.push("rgb(" + rgb.join(', ') + ")");
         }
 
-        var line_types = [[20, 5], [100000, 1], [10, 2]];
-        for(var i=line_types.length; i < $scope.elements_can_plot.length; i++) {
-            line_types.push(line_types[line_types.length-1].concat([2, 3]));
+        $scope.line_types = [[20, 5], [100000, 1], [10, 2]];
+        for(var i=$scope.line_types.length; i < $scope.elements_can_plot.length; i++) {
+            $scope.line_types.push($scope.line_types[$scope.line_types.length-1].concat([2, 3]));
         }
 
         $scope.models.forEach(function(model){
@@ -287,8 +288,8 @@ app.controller('ApplicationController', function ($scope, $localStorage, $sessio
                         $scope.datasetOverride.push({
                             pointRadius: 0,
                             fill: false,
-                            borderColor: "rgb(" + line_colours[$scope.models.indexOf(model)].join(', ') + ")",
-                            borderDash: line_types[$scope.elements_can_plot.indexOf(key)]
+                            borderColor: $scope.line_colours[$scope.models.indexOf(model)],
+                            borderDash: $scope.line_types[$scope.elements_can_plot.indexOf(key)]
                         });
                     }
                 });

@@ -57,6 +57,7 @@
             <div class="col-xs-* col-sm-6 legend">
                 <ul class="list-unstyled legend-pane">
                     <li class="legend-row" ng-repeat="model in models">
+                        <b ng-style="{'color': line_colours[models.indexOf(model)]}">▉</b>
                         <input type="checkbox" ng-model="visible_models[model.id]" id="checkbox_{{ model.id }}" ng-change="loadLines()"/>
                         <label for="checkbox_{{ model.id }}">{{model.name}}</label>
                     </li>
