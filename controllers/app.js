@@ -958,7 +958,7 @@ app.controller('ApplicationController', function ($scope, $localStorage, $sessio
                 model.simulation_time,
                 model.max_dist);
             simulators[model.id] = sim;
-            if ($scope.elements_can_plot === []) {
+            if ($scope.elements_can_plot  < 1) {
                 var pnt = sim.getFinalPoint();
                 $scope.elements_can_plot = Object.keys(pnt);
             }
