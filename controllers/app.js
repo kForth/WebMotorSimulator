@@ -58,7 +58,9 @@ app.controller('ApplicationController', function ($scope, $localStorage, $sessio
     $scope.temp_model = undefined;
     $scope.temp_model_type = undefined;
     $scope.temp_model_inputs = undefined;
-    var next_model_id = (Math.max.apply(null, $scope.models.map(function(elem){return elem.id})) + 1) || 0;
+    var next_model_id = Math.max.apply($scope.models.map(function(elem){return elem.id}));
+    if(next_model_id < 0)
+        next_model_id = 0;
 
     $scope.$watch('models', function () {
         $sessionStorage.models = $scope.models;
@@ -159,6 +161,9 @@ app.controller('ApplicationController', function ($scope, $localStorage, $sessio
             if (model.id === undefined || model.id == null) {
                 model.id = next_model_id++;
                 $scope.models_collapsed[model.id] = true;
+            }
+            else{
+                console.log(model.id);
             }
 
             if($scope.visible_models[model.id] === undefined || $scope.visible_models[model.id] === null) {
