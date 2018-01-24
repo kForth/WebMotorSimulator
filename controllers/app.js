@@ -1,45 +1,98 @@
-var app = angular.module('app', ['ngAnimate', 'ui.bootstrap', 'ngStorage', 'chart.js', 'ui.sortable']);
+var app = angular.module('app', ['ngAnimate', 'ui.bootstrap', 'ngStorage', 'chart.js', 'ui.sortable', 'firebase', 'ngRoute']);
 
-String.prototype.toProperCase = function () {
-    return this.replace(/\w\S*/g, function (txt) {
-        return txt.charAt(0).toUpperCase() + txt.substr(1).toLowerCase();
-    });
-};
+app.config(function ($routeProvider, $locationProvider) {
+    $locationProvider.html5Mode(false).hashPrefix('');
+    $routeProvider
+        .when("/:key", {
+            templateUrl: 'index.html'
+        })
+        .when("/", {
+            templateUrl: 'index.html'
+        });
 
-String.prototype.replaceAll = function (str1, str2, ignore) {
-    return this.replace(new RegExp(str1.replace(/([\/\,\!\\\^\$\{\}\[\]\(\)\.\*\+\?\|\<\>\-\&])/g, "\\$&"), (ignore ? "gi" : "g")), (typeof(str2) == "string") ? str2.replace(/\$/g, "$$$$") : str2);
-};
+    // $routeProvider.html5Mode(true);
+});
 
-function hslToRgb(h, s, l){
+function hslToRgb(h, s, l) {
     var r, g, b;
 
-    if(s === 0){
+    if (s === 0) {
         r = g = b = l; // achromatic
     }
-    else{
-        var hue2rgb = function hue2rgb(p, q, t){
-            if(t < 0) t += 1;
-            if(t > 1) t -= 1;
-            if(t < 1/6) return p + (q - p) * 6 * t;
-            if(t < 1/2) return q;
-            if(t < 2/3) return p + (q - p) * (2/3 - t) * 6;
+    else {
+        var hue2rgb = function hue2rgb(p, q, t) {
+            if (t < 0) t += 1;
+            if (t > 1) t -= 1;
+            if (t < 1 / 6) return p + (q - p) * 6 * t;
+            if (t < 1 / 2) return q;
+            if (t < 2 / 3) return p + (q - p) * (2 / 3 - t) * 6;
             return p;
         };
 
         var q = l < 0.5 ? l * (1 + s) : l + s - l * s;
         var p = 2 * l - q;
-        r = hue2rgb(p, q, h + 1/3);
+        r = hue2rgb(p, q, h + 1 / 3);
         g = hue2rgb(p, q, h);
-        b = hue2rgb(p, q, h - 1/3);
+        b = hue2rgb(p, q, h - 1 / 3);
     }
 
     return [Math.round(r * 255), Math.round(g * 255), Math.round(b * 255)];
 }
 
-app.controller('ApplicationController', function ($scope, $localStorage, $sessionStorage, $location, $http, $log) {
+app.service('FirebaseService', function ($firebaseObject) {
+    var config = {
+        apiKey: "AIzaSyC-bEZJKv6UpRUq50VA8o6KO2VhVRQRPFY",
+        authDomain: "motor-sim.firebaseapp.com",
+        databaseURL: "https://motor-sim.firebaseio.com",
+        projectId: "motor-sim",
+        storageBucket: "motor-sim.appspot.com",
+        messagingSenderId: "1000610674791"
+    };
+    var initialized = false;
+    var db = undefined;
+
+    function initializeFirebase() {
+        firebase.initializeApp(config);
+        db = $firebaseObject(firebase.database().ref());
+        initialized = true;
+    }
+
+    function getModelSet(key){
+        if(!initialized) initializeFirebase();
+        return firebase.database().ref('models/' + key).once('value');
+    }
+
+    function addModelSet(models, visible_models, visible_elements) {
+        if(!initialized) initializeFirebase();
+        var key = firebase.database().ref().child('models').push().key;
+        var updates = {};
+        updates['/models/' + key] = JSON.stringify({
+            models: models,
+            visible_models: visible_models,
+            visible_elements: visible_elements
+        });
+        return firebase.database().ref().update(updates) ? key : undefined;
+    }
+
+    return {
+        getModelSet: getModelSet,
+        addModelSet: addModelSet
+    }
+});
+
+app.controller('ApplicationController', function ($scope, $localStorage, $sessionStorage, $location, FirebaseService) {
     $scope.model_types = MODEL_TYPES;
     $scope.motors = MOTORS;
 
+    $scope.models = $sessionStorage.models || [];
+    $scope.models_expanded = $sessionStorage.models_expanded || {};
+    $scope.scale_factors = $sessionStorage.scale_factors || DATA_SCALE_FACTORS;
+    $scope.visible_models = $sessionStorage.visible_models || {};
+    $scope.visible_elements = $sessionStorage.visible_elements || {};
+    $scope.settings_categories = SETTINGS_CATEGORIES;
+    $scope.temp_model = undefined;
+    $scope.temp_model_type = undefined;
+    $scope.temp_model_inputs = undefined;
     $scope.settings_collapsed = [
         {'basic': false},
         {'power': true},
@@ -47,35 +100,52 @@ app.controller('ApplicationController', function ($scope, $localStorage, $sessio
         {'battery': true},
         {'simulation': true}
     ];
+    var next_model_id = 0;
+    $scope.models.forEach(function (elem) {
+        if(elem.id >= next_model_id) next_model_id = elem.id + 1;
+    });
 
-    $scope.settings_categories = SETTINGS_CATEGORIES;
-
-    $scope.models = $sessionStorage.models || [];
-    $scope.models_collapsed = $sessionStorage.models_collapsed || {};
-    $scope.scale_factors = $sessionStorage.scale_factors || DATA_SCALE_FACTORS;
-    $scope.visible_models = $sessionStorage.visible_models || {};
-    $scope.visible_elements = $sessionStorage.visible_elements || {};
-    $scope.temp_model = undefined;
-    $scope.temp_model_type = undefined;
-    $scope.temp_model_inputs = undefined;
-    var next_model_id = Math.max.apply($scope.models.map(function(elem){return elem.id}));
-    if(next_model_id < 0)
-        next_model_id = 0;
+    var session_key = $location.path().substr(1);
+    if(session_key.length > 0){
+        $scope.data_loading = 1;
+        $scope.models = [];
+        FirebaseService.getModelSet(session_key)
+            .then(function(snapshot){
+                snapshot = JSON.parse(snapshot.val());
+                if(snapshot === null){
+                    $location.path('/');
+                    $scope.data_loading -= 1;
+                    return;
+                }
+                $scope.models = snapshot['models'];
+                $scope.visible_models = snapshot['visible_models'];
+                $scope.visible_elements = snapshot['visible_elements'];
+                next_model_id = 0;
+                $scope.models.forEach(function (elem) {
+                    if(elem.id > next_model_id) next_model_id = elem.id;
+                });
+                $scope.data_loading = 0;
+            });
+    }
 
     $scope.$watch('models', function () {
         $sessionStorage.models = $scope.models;
+        $scope.runSim();
     });
-    $scope.$watch('models_collapsed', function () {
-        $sessionStorage.models_collapsed = $scope.models_collapsed;
+    $scope.$watch('models_expanded', function () {
+        $sessionStorage.models_expanded = $scope.models_expanded;
     });
     $scope.$watch('visible_models', function () {
         $sessionStorage.visible_models = $scope.visible_models;
+        $scope.loadLines();
     });
     $scope.$watch('visible_elements', function () {
         $sessionStorage.visible_elements = $scope.visible_elements;
+        $scope.loadLines();
     });
     $scope.$watch('scale_factors', function () {
         $sessionStorage.scale_factors = $scope.scale_factors;
+        $scope.loadLines();
     });
 
     $scope.$watch(
@@ -84,7 +154,7 @@ app.controller('ApplicationController', function ($scope, $localStorage, $sessio
         },
         function () {
             $scope.models = $sessionStorage.models;
-            $scope.models_collapsed = $sessionStorage.models_collapsed;
+            $scope.models_expanded = $sessionStorage.models_expanded;
             $scope.visible_models = $sessionStorage.visible_models;
             $scope.visible_elements = $sessionStorage.visible_elements;
             $scope.scale_factors = $sessionStorage.scale_factors;
@@ -100,6 +170,12 @@ app.controller('ApplicationController', function ($scope, $localStorage, $sessio
         return motors;
     }
 
+    $scope.shareModels = function(){
+        if($scope.models.length < 1) return;
+        var key = FirebaseService.addModelSet($scope.models, $scope.visible_models, $scope.visible_elements);
+        if(key !== undefined) $location.path('/' + key);
+    };
+
     $scope.addModel = function (model_type) {
         $scope.model_input_errors = [];
         $scope.temp_model = angular.copy(model_type.model);
@@ -110,7 +186,7 @@ app.controller('ApplicationController', function ($scope, $localStorage, $sessio
 
     $scope.deleteModel = function (model) {
         $scope.models.splice($scope.models.indexOf(model), 1);
-        delete $scope.models_collapsed[model.id];
+        delete $scope.models_expanded[model.id];
         delete $scope.visible_models[model.id];
         $scope.loadLines();
     };
@@ -160,24 +236,21 @@ app.controller('ApplicationController', function ($scope, $localStorage, $sessio
             model.inputs = getModelInputs(model.model_type);
             if (model.id === undefined || model.id == null) {
                 model.id = next_model_id++;
-                $scope.models_collapsed[model.id] = true;
-            }
-            else{
-                console.log(model.id);
+                $scope.models_expanded[model.id] = false;
             }
 
-            if($scope.visible_models[model.id] === undefined || $scope.visible_models[model.id] === null) {
+            if ($scope.visible_models[model.id] === undefined || $scope.visible_models[model.id] === null) {
                 $scope.visible_models[model.id] = ($scope.models.length < 5);
             }
 
-            if($scope.temp_model_index !== undefined) {
+            if ($scope.temp_model_index !== undefined) {
                 $scope.models[$scope.temp_model_index] = model;
             }
-            else{
+            else {
                 $scope.models.push(model);
             }
-            $scope.cancelModel();
             $scope.runSim();
+            $scope.cancelModel();
         }
     };
 
@@ -194,7 +267,7 @@ app.controller('ApplicationController', function ($scope, $localStorage, $sessio
         simulators = {};
         $scope.series = [];
         $scope.data = [];
-        $scope.models.forEach(function(model){
+        $scope.models.forEach(function (model) {
             var sim = new Simulator(model.motors,
                 model.gear_ratio,
                 model.motor_current_limit,
@@ -216,7 +289,7 @@ app.controller('ApplicationController', function ($scope, $localStorage, $sessio
                 model.max_dist);
             simulators[model.id] = sim;
             var data = {};
-            $scope.elements_can_plot.forEach(function(elem){
+            $scope.elements_can_plot.forEach(function (elem) {
                 data[elem] = [];
             });
             sim.getDataPoints().forEach(function (pt) {
@@ -255,7 +328,7 @@ app.controller('ApplicationController', function ($scope, $localStorage, $sessio
         $scope.datasetOverride = [];
 
         $scope.line_colours = [];
-        for(var i=0; i < $scope.models.length; i++) {
+        for (var i = 0; i < $scope.models.length; i++) {
             var hue = (i / $scope.models.length);
             var saturation = 0.5;
             var luminance = 0.5;
@@ -264,12 +337,12 @@ app.controller('ApplicationController', function ($scope, $localStorage, $sessio
         }
 
         $scope.line_types = [[20, 5], [100000, 1], [10, 2]];
-        for(var i=$scope.line_types.length; i < $scope.elements_can_plot.length; i++) {
-            $scope.line_types.push($scope.line_types[$scope.line_types.length-1].concat([2, 3]));
+        for (var i = $scope.line_types.length; i < $scope.elements_can_plot.length; i++) {
+            $scope.line_types.push($scope.line_types[$scope.line_types.length - 1].concat([2, 3]));
         }
 
-        $scope.models.forEach(function(model){
-            if($scope.visible_models[model.id]) {
+        $scope.models.forEach(function (model) {
+            if ($scope.visible_models[model.id]) {
                 $scope.elements_can_plot.forEach(function (key) {
                     if ($scope.visible_elements[key]) {
                         var data = [];
@@ -320,7 +393,6 @@ app.controller('ApplicationController', function ($scope, $localStorage, $sessio
             }]
         }
     };
-
 
     $scope.runSim();
 });
