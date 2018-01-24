@@ -57,19 +57,20 @@ app.service('FirebaseService', function ($firebaseObject) {
         initialized = true;
     }
 
-    function getModelSet(key){
-        if(!initialized) initializeFirebase();
+    function getModelSet(key) {
+        if (!initialized) initializeFirebase();
         return firebase.database().ref('models/' + key).once('value');
     }
 
     function addModelSet(models, visible_models, visible_elements) {
-        if(!initialized) initializeFirebase();
+        if (!initialized) initializeFirebase();
         var key = firebase.database().ref().child('models').push().key;
         var updates = {};
         updates['/models/' + key] = JSON.stringify({
             models: models,
             visible_models: visible_models,
-            visible_elements: visible_elements
+            visible_elements: visible_elements,
+            created: Date.now()
         });
         return firebase.database().ref().update(updates) ? key : undefined;
     }
@@ -102,17 +103,17 @@ app.controller('ApplicationController', function ($scope, $localStorage, $sessio
     ];
     var next_model_id = 0;
     $scope.models.forEach(function (elem) {
-        if(elem.id >= next_model_id) next_model_id = elem.id + 1;
+        if (elem.id >= next_model_id) next_model_id = elem.id + 1;
     });
 
     var session_key = $location.path().substr(1);
-    if(session_key.length > 0){
+    if (session_key.length > 0) {
         $scope.data_loading = 1;
         $scope.models = [];
         FirebaseService.getModelSet(session_key)
-            .then(function(snapshot){
+            .then(function (snapshot) {
                 snapshot = JSON.parse(snapshot.val());
-                if(snapshot === null){
+                if (snapshot === null) {
                     $location.path('/');
                     $scope.data_loading -= 1;
                     return;
@@ -122,7 +123,7 @@ app.controller('ApplicationController', function ($scope, $localStorage, $sessio
                 $scope.visible_elements = snapshot['visible_elements'];
                 next_model_id = 0;
                 $scope.models.forEach(function (elem) {
-                    if(elem.id > next_model_id) next_model_id = elem.id;
+                    if (elem.id > next_model_id) next_model_id = elem.id;
                 });
                 $scope.data_loading = 0;
             });
@@ -170,10 +171,10 @@ app.controller('ApplicationController', function ($scope, $localStorage, $sessio
         return motors;
     }
 
-    $scope.shareModels = function(){
-        if($scope.models.length < 1) return;
+    $scope.shareModels = function () {
+        if ($scope.models.length < 1) return;
         var key = FirebaseService.addModelSet($scope.models, $scope.visible_models, $scope.visible_elements);
-        if(key !== undefined) $location.path('/' + key);
+        if (key !== undefined) $location.path('/' + key);
     };
 
     $scope.addModel = function (model_type) {
