@@ -63,14 +63,6 @@ function Simulator(motors,  // Motor object
     this.effective_radius = this.effective_diameter / 2;
     this.effective_weight = this.effective_mass * 9.80665;  // effective weight, Newtons
 
-    if (this.check_for_slip) {
-        this.traction_limited = ((this.motor_current_limit === undefined ? this.motors.stall_current : this.motor_current_limit) * this.motors.k_t * this.gear_ratio * this.k_gearbox_efficiency / this.effective_radius) > (this.effective_weight * this.coeff_static_friction)
-        console.log('\tTraction Limited: ' + this.traction_limited);
-    }
-    if (this.incline_angle > 0) {
-        console.log('\tHold Current: ' + this.getGravityForce() * this.effective_radius / this.gear_ratio / this.motors.k_t);
-    }
-
     this.initVars = function () {
         this._time = 0;  // elapsed time, seconds
         this._position = this.init_pos;  // distance traveled, meters
