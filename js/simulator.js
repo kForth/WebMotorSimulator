@@ -84,6 +84,10 @@ function Simulator(motors,  // Motor object
         return this.effective_weight * Math.sin(this.incline_angle * 180 / Math.PI);
     };
 
+    this.getNormalForce = function () {
+        return this.effective_weight * Math.cos(this.incline_angle * 180 / Math.PI);
+    };
+
     this._calc_max_accel = function (velocity) {
         var motor_speed = velocity / this.effective_radius * this.gear_ratio;
 
@@ -114,15 +118,15 @@ function Simulator(motors,  // Motor object
         var available_force_at_axle = available_torque_at_axle / this.effective_radius;
 
         if (this.check_for_slip) {
-            if (available_force_at_axle > this.effective_weight * this.coeff_static_friction) {
+            if (available_force_at_axle > this.getNormalForce() * this.coeff_static_friction) {
                 this._slipping = true;
             }
-            else if (available_force_at_axle < this.effective_weight * this.coeff_kinetic_friction) {
+            else if (available_force_at_axle < this.getNormalForce() * this.coeff_kinetic_friction) {
                 this._slipping = false;
             }
 
             if (this._slipping) {
-                available_force_at_axle = (this.effective_weight * this.coeff_kinetic_friction);
+                available_force_at_axle = (this.getNormalForce() * this.coeff_kinetic_friction);
             }
         }
 
