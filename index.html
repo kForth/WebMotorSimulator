@@ -61,7 +61,8 @@
                 <ul class="list-unstyled legend-pane">
                     <li class="legend-row" ng-repeat="model in models">
                         <b ng-style="{'color': line_colours[models.indexOf(model)]}">▉</b>
-                        <input type="checkbox" ng-model="visible_models[model.id]" id="checkbox_{{ model.id }}"/>
+                        <input type="checkbox" ng-model="visible_models[model.id]" id="checkbox_{{ model.id }}"
+                               ng-change="loadLines()"/>
                         <label for="checkbox_{{ model.id }}">{{model.name}}</label>
                     </li>
                 </ul>
@@ -70,13 +71,14 @@
                 <ul class="list-unstyled legend-pane">
                     <li class="legend-row form-inline" ng-repeat="elem in elements_can_plot">
                         <div class="form-group">
-                            <input type="checkbox" ng-model="visible_elements[elem]" id="checkbox_{{ elem }}"/>
+                            <input type="checkbox" ng-model="visible_elements[elem]" id="checkbox_{{ elem }}"
+                                   ng-change="loadLines()"/>
                             <label for="checkbox_{{ elem }}">{{ element_titles[elem] }}</label>
                         </div>
                         <div class="form-group">
                             <label for="input_{{ elem }}"> / </label>
                             <input class="form-control" style="width: 80px" type="number" id="input_{{ elem }}"
-                                   ng-model="scale_factors[elem]" />
+                                   ng-model="scale_factors[elem]" ng-change="loadLines()" />
                         </div>
                     </li>
                 </ul>

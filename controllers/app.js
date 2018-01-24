@@ -123,30 +123,27 @@ app.controller('ApplicationController', function ($scope, $localStorage, $sessio
                 $scope.visible_elements = snapshot['visible_elements'];
                 next_model_id = 0;
                 $scope.models.forEach(function (elem) {
-                    if (elem.id > next_model_id) next_model_id = elem.id;
+                    if(elem.id >= next_model_id) next_model_id = elem.id + 1;
                 });
                 $scope.data_loading = 0;
+                $scope.runSim();
             });
     }
 
     $scope.$watch('models', function () {
         $sessionStorage.models = $scope.models;
-        $scope.runSim();
     });
     $scope.$watch('models_expanded', function () {
         $sessionStorage.models_expanded = $scope.models_expanded;
     });
     $scope.$watch('visible_models', function () {
         $sessionStorage.visible_models = $scope.visible_models;
-        $scope.loadLines();
     });
     $scope.$watch('visible_elements', function () {
         $sessionStorage.visible_elements = $scope.visible_elements;
-        $scope.loadLines();
     });
     $scope.$watch('scale_factors', function () {
         $sessionStorage.scale_factors = $scope.scale_factors;
-        $scope.loadLines();
     });
 
     $scope.$watch(
@@ -189,7 +186,7 @@ app.controller('ApplicationController', function ($scope, $localStorage, $sessio
         $scope.models.splice($scope.models.indexOf(model), 1);
         delete $scope.models_expanded[model.id];
         delete $scope.visible_models[model.id];
-        $scope.loadLines();
+        $scope.runSim();
     };
 
     $scope.editModel = function (model) {
@@ -250,9 +247,9 @@ app.controller('ApplicationController', function ($scope, $localStorage, $sessio
             else {
                 $scope.models.push(model);
             }
-            $scope.runSim();
             $scope.cancelModel();
         }
+        $scope.runSim();
     };
 
     $scope.cancelModel = function () {
