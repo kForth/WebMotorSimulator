@@ -12,6 +12,7 @@ var MODEL_TYPES = [
             motor_peak_current_limit: null,
             motor_voltage_limit: null,
             k_gearbox_efficiency: 0.7,
+            check_for_slip: true,
             coeff_kinetic_friction: 0.8,
             coeff_static_friction: 1.0,
             incline_angle: 0,
@@ -22,7 +23,7 @@ var MODEL_TYPES = [
             resistance_idv: 0.002,
             time_step: 0.01,
             simulation_time: 10.0,
-            max_dist: 8
+            max_dist: 6
         }
     },
     {
@@ -38,9 +39,10 @@ var MODEL_TYPES = [
             motor_peak_current_limit: null,
             motor_voltage_limit: null,
             k_gearbox_efficiency: 0.7,
-            coeff_kinetic_friction: 0.8,
-            coeff_static_friction: 1.0,
-            incline_angle: 0,
+            check_for_slip: false,
+            coeff_kinetic_friction: 100,
+            coeff_static_friction: 100,
+            incline_angle: 90,
             k_resistance_s: 0,
             k_resistance_v: 0,
             battery_voltage: 12.5,
@@ -48,7 +50,7 @@ var MODEL_TYPES = [
             resistance_idv: 0.002,
             time_step: 0.01,
             simulation_time: 10.0,
-            max_dist: 8
+            max_dist: 1
         }
     },
     {
@@ -64,6 +66,7 @@ var MODEL_TYPES = [
             motor_peak_current_limit: null,
             motor_voltage_limit: null,
             k_gearbox_efficiency: 0.7,
+            check_for_slip: false,
             coeff_kinetic_friction: 0.8,
             coeff_static_friction: 1.0,
             incline_angle: 0,
@@ -74,7 +77,7 @@ var MODEL_TYPES = [
             resistance_idv: 0.002,
             time_step: 0.01,
             simulation_time: 10.0,
-            max_dist: 8
+            max_dist: 1
         }
     }
 ];

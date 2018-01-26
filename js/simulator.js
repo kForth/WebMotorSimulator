@@ -7,6 +7,7 @@ function Simulator(motors,  // Motor object
                    effective_mass,  // Effective mass, kg
                    k_gearbox_efficiency,  // Gearbox efficiency fraction
                    incline_angle,  // Incline angle relative to ground, deg
+                   check_for_slip, //Check for slip
                    coeff_kinetic_friction,  // µk
                    coeff_static_friction,  // µs
                    k_resistance_s,  // static resistance, N
@@ -29,7 +30,7 @@ function Simulator(motors,  // Motor object
     this.effective_diameter = effective_diameter;
     this.incline_angle = incline_angle;
     this.effective_mass = effective_mass;
-    this.check_for_slip = true;
+    this.check_for_slip = check_for_slip;
     this.coeff_kinetic_friction = coeff_kinetic_friction;
     this.coeff_static_friction = coeff_static_friction;
     this.motor_current_limit = motor_current_limit;
@@ -81,11 +82,11 @@ function Simulator(motors,  // Motor object
     };
 
     this.getGravityForce = function () {
-        return this.effective_weight * Math.sin(this.incline_angle * 180 / Math.PI);
+        return this.effective_weight * Math.sin(this.incline_angle / 180 * Math.PI);
     };
 
     this.getNormalForce = function () {
-        return this.effective_weight * Math.cos(this.incline_angle * 180 / Math.PI);
+        return this.effective_weight * Math.cos(this.incline_angle / 180 * Math.PI);
     };
 
     this._calc_max_accel = function (velocity) {
@@ -97,6 +98,9 @@ function Simulator(motors,  // Motor object
             available_voltage = Math.min(this._voltage, this.motor_voltage_limit);
         }
 
+        console.log(available_voltage);
+        console.log(motor_speed);
+        console.log();
         this._current_per_motor = (available_voltage - (motor_speed / this.motors.k_v)) / this.motors.k_r;
 
         if (velocity > 0 && this.motor_current_limit !== undefined && this.motor_current_limit !== null) {

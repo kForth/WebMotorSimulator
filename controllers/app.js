@@ -260,7 +260,6 @@ app.controller('ApplicationController', function ($scope, $localStorage, $sessio
     };
 
     $scope.runSim = function () {
-        var temp_series = [];
         simulator_data = {};
         simulators = {};
         $scope.series = [];
@@ -275,6 +274,7 @@ app.controller('ApplicationController', function ($scope, $localStorage, $sessio
                 model.effective_mass,
                 model.k_gearbox_efficiency,
                 model.incline_angle,
+                model.check_for_slip,
                 model.coeff_kinetic_friction,
                 model.coeff_static_friction,
                 model.k_resistance_s,
@@ -298,25 +298,7 @@ app.controller('ApplicationController', function ($scope, $localStorage, $sessio
                     });
                 }
             });
-            for (var k in data) {
-                simulator_data[model.id] = data;
-                temp_series.push({
-                    label: model.name + " " + k,
-                    key: k
-                });
-            }
-        });
-        temp_series.sort(function (a, b) {
-            if (a['key'] > b['key']) return 1;
-            else if (a['key'] < b['key']) return -1;
-            else {
-                if (a['label'] > b['label']) return 1;
-                else if (a['label'] < b['label']) return -1;
-                else return 0;
-            }
-        });
-        temp_series.forEach(function (elem) {
-            $scope.series.push(elem.label);
+            simulator_data[model.id] = data;
         });
         $scope.loadLines();
     };
