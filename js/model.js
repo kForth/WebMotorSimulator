@@ -142,6 +142,14 @@ var MODEL_INPUTS = {
             required: true,
             unique: false,
             order: 41
+        },
+        {
+            label: 'Coefficient of Kinetic Friction',
+            key: 'coeff_kinetic_friction',
+            type: 'number',
+            required: false,
+            unique: false,
+            order: 42
         }
     ],
     'Elevator': [
@@ -284,9 +292,9 @@ function getModelInputs(model_type) {
             },
             {
                 label: 'Gearbox Efficiency',
-                key: 'k_efficiency',
+                key: 'k_gearbox_efficiency',
                 type: 'number',
-                suffix: '%',
+                suffix: '%/10',
                 required: false,
                 unique: false,
                 order: 22
@@ -310,22 +318,6 @@ function getModelInputs(model_type) {
                 required: false,
                 unique: false,
                 order: 21
-            },
-            {
-                label: 'Coefficient of Kinetic Friction',
-                key: 'coeff_kinetic_friction',
-                type: 'number',
-                required: false,
-                unique: false,
-                order: 12
-            },
-            {
-                label: 'Coefficient of Static Friction',
-                key: 'coeff_static_friction',
-                type: 'number',
-                required: false,
-                unique: false,
-                order: 22
             },
             {
                 label: 'Incline Angle',
