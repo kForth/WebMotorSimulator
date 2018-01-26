@@ -101,8 +101,9 @@ function Simulator(motors,  // Motor object
         this._current_per_motor = (available_voltage - (motor_speed / this.motors.k_v)) / this.motors.k_r;
 
         if (velocity > 0 && this.motor_current_limit !== undefined && this.motor_current_limit !== null) {
-            var current_sum = this._current_history.reduce(function (a, b) {
-                return a + b
+            var current_sum = 0;
+            this._current_history.forEach(function (e) {
+                current_sum += e;
             });
             if (((current_sum / this._current_history.length) > this.motor_current_limit) || this._was_current_limited) {
                 this._was_current_limited = true;
