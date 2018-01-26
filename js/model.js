@@ -265,7 +265,7 @@ function getModelInputs(model_type) {
         'power': [
             {
                 label: 'Current Limit',
-                key: 'current_limit',
+                key: 'motor_current_limit',
                 type: 'number',
                 suffix: 'A',
                 required: false,
@@ -274,7 +274,7 @@ function getModelInputs(model_type) {
             },
             {
                 label: 'Peak Current Limit',
-                key: 'peak_current_limit',
+                key: 'motor_peak_current_limit',
                 type: 'number',
                 suffix: 'A',
                 required: false,
@@ -283,7 +283,7 @@ function getModelInputs(model_type) {
             },
             {
                 label: 'Voltage Limit',
-                key: 'voltage_limit',
+                key: 'motor_voltage_limit',
                 type: 'number',
                 suffix: 'V',
                 required: false,
