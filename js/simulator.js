@@ -98,9 +98,6 @@ function Simulator(motors,  // Motor object
             available_voltage = Math.min(this._voltage, this.motor_voltage_limit);
         }
 
-        console.log(available_voltage);
-        console.log(motor_speed);
-        console.log();
         this._current_per_motor = (available_voltage - (motor_speed / this.motors.k_v)) / this.motors.k_r;
 
         if (velocity > 0 && this.motor_current_limit !== undefined && this.motor_current_limit !== null) {
@@ -221,7 +218,7 @@ var DATA_HEADERS = {
     'current':       'Current/10 (A)',
     'total_current': 'Total Current/100 (A)',
     'sys_voltage':   'System Voltage (V)',
-    'energy':        'Energy (nAh)',
+    'energy':        'Energy (mAh)',
     'total_energy':  'Total Energy/10 (mAh)',
     'slipping':      'Slipping',
     'brownout':      'Brownout',
