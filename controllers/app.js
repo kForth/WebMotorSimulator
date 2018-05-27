@@ -41,12 +41,12 @@ function hslToRgb(h, s, l) {
 
 app.service('FirebaseService', function ($firebaseObject) {
     var config = {
-        apiKey: "AIzaSyC-bEZJKv6UpRUq50VA8o6KO2VhVRQRPFY",
-        authDomain: "motor-sim.firebaseapp.com",
-        databaseURL: "https://motor-sim.firebaseio.com",
-        projectId: "motor-sim",
-        storageBucket: "motor-sim.appspot.com",
-        messagingSenderId: "1000610674791"
+        apiKey: "AIzaSyCxoOU5GwujNjSmXEk4SEpp6ro92fZ9-6A",
+        authDomain: "dc-motor-sim.firebaseapp.com",
+        databaseURL: "https://dc-motor-sim.firebaseio.com",
+        projectId: "dc-motor-sim",
+        storageBucket: "dc-motor-sim.appspot.com",
+        messagingSenderId: "727873687029"
     };
     var initialized = false;
     var db = undefined;
