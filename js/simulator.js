@@ -276,6 +276,14 @@ var MOTORS = [
         free_current: 0.7
     },
     {
+        name: "REV NEO",
+        max_voltage: 12,
+        free_rpm: 5778,
+        stall_torque: 2.65,
+        stall_current: 40,
+        free_current: 2
+    },
+    {
         name: "AM 9015",
         max_voltage: 12,
         free_rpm: 14270,
