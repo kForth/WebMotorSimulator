@@ -244,6 +244,14 @@ var DATA_SCALE_FACTORS = {
 
 var MOTORS = [
     {
+        name: "Falcon 500",
+        max_voltage: 12,
+        free_rpm: 6380,
+        stall_torque: 4.69,
+        stall_current: 257,
+        free_current: 1.5
+    },
+    {
         name: "CIM",
         max_voltage: 12,
         free_rpm: 5330,
@@ -274,6 +282,14 @@ var MOTORS = [
         stall_torque: 0.71,
         stall_current: 134,
         free_current: 0.7
+    },
+    {
+        name: "REV NEO",
+        max_voltage: 12,
+        free_rpm: 5778,
+        stall_torque: 2.65,
+        stall_current: 110,
+        free_current: 2
     },
     {
         name: "AM 9015",
